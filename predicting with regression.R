@@ -29,23 +29,19 @@ wage <- subset(wage, select=-c(logwage))
 summary(wage)
 
 ## data spliting
-intrain <- createDataPartition(y=fa$waiting,p=0.5, list=F)
-trainfa <- fa[intrain,]
-testfa <- fa[-intrain,]
+intrain <- createDataPartition(y=wage$wage,p=0.7, list=F)
+training <- wage[intrain,]
+testing <- wage[-intrain,]
 
+featurePlot(x=training[, c("age", "education", "jobclass")], y=training$wage, plot = "pairs")
 
+    # plot age vs wage
+qplot(age, wage, data=training, color=jobclass)
+qplot(age, wage, data=training, color=education)
 
-
-
-
-
-
-
-
-
-
-
-
+    # fit a linear model
+modfit <- train(wage~age + jobclass + education, method="lm", data=training)
+modfit$modelInfo
 
 
 
