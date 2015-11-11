@@ -33,19 +33,29 @@ M <- abs(cor(training[,c(-3,-4,-58)])) # leave out the charater type
 diag(M) <- 0 # every variable has correlation 1 with itself. So i don't need to care the diag(M)
 which(M>0.8, arr.ind = T)
 
-## MODEL TRAIN - WE WILL USE random forest as our model IMPLEMENTED IN THE randomForest PACKAGE
+## MODEL TRAIN(RANDOM FOREST) - WE WILL USE random forest as our model IMPLEMENTED IN THE randomForest PACKAGE
 library(randomForest)
 rfModel <- randomForest(classe~., data=training, importance= T, ntrees=10)
 
 ## MODEL VALIDATION - VALIDATION SET ACCURACY
 pre_validation <- predict(rfModel,validation)
-print(confusionMatrix(pre_validation, validation$classe))
+print(confusionMatrix(pre_validation, validation$classe)) ## acuurancy = 0.9967
 
 
+## TESTSET PREDICTION
+pre_test <- predict(rfModel,test_pml)
+pre_test
 
+## OUTPUT THE RESULT ACCORDING TO THE INSTRUCTURE. 
+answers <- as.vector(pre_test)
 
+pml_write_files = function(x) {
+    n = length(x)
+    for (i in 1:n) {
+        filename = paste0("problem_id_", i, ".txt")
+        write.table(x[i], file = filename, quote = FALSE, row.names = FALSE, 
+                    col.names = FALSE)
+    }
+}
 
-
-
-
-
+pml_write_files(answers)
