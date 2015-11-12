@@ -35,6 +35,10 @@ First, we clean up missing values, remove zero covariate and descriptive feature
         training_knn <- training_knn[, !names(training_knn) %in% excludecols]
         testing_knn <- testing_knn[, !names(testing_knn) %in% excludecols]
         
+```
+
+We are gonna to normalize data here to make each column with a standard deviation equal 1. 
+```{r}
         # NORMALIZE DATA both training_knn and testing_knn
         normalize <- function(x) { return ((x - min(x)) / (max(x) - min(x)))}
         tem <- rbind(training_knn[,-53], testing_knn[-53])
@@ -48,9 +52,8 @@ First, we clean up missing values, remove zero covariate and descriptive feature
         training_body <- training_knn[intrain,][,-53]
         validation_body <- training_knn[-intrain,][,-53]
         training_label <- training_knn[intrain,][,53]
-        validation_label <- training_knn[-intrain,][,53]
+        validation_label <- training_knn[-intrain,][,53]  
 ```
-
 # VALIDATION SET PREDICTION and EVALUATION
 We will us KNN as our model IMPLEMENTED IN THE class PACKAGE
 ```{r}
@@ -60,7 +63,7 @@ print(confusionMatrix(pred_vlidation, validation_label))
 ```
 
 # PERFORMACE INCREASE
-
+First, we will try different k values. 
 ```{r}
     # try different K - k=20    
     pred_vlidation<- knn(training_body,validation_body, training_label, k=20 )
@@ -74,6 +77,7 @@ print(confusionMatrix(pred_vlidation, validation_label))
 ```
 
 # PERFORMANCE INCREASE 2
+Second,instead of normalizing data, we use Z-score to standardize our data set. THen try KNN model with different k values. 
 ```{r}
     # USE Z-SCORE SDANDARDIZE DATA
     t_z <- as.data.frame(scale(training_knn[,-53]))
@@ -100,3 +104,7 @@ print(confusionMatrix(pred_vlidation, validation_label))
     pred_vlidation<- knn(training_body,validation_body, training_label, k=5 )
     print(confusionMatrix(pred_vlidation , validation_label))
 ```
+
+# CONCLUSION
+1. With the same K value, z-score standardizing data has better better prediction than normalizating the data. 
+2. As K value decreases, prediction accuracy increases. 

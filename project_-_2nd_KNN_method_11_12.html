@@ -92,9 +92,9 @@ test_pml &lt;- read.csv(&quot;/Users/Richard/Desktop/Rcourse/data/practical_mach
         excludecols &lt;- c(&quot;X&quot;, &quot;user_name&quot;, &quot;raw_timestamp_part_1&quot;, &quot;raw_timestamp_part_2&quot;, 
                          &quot;cvtd_timestamp&quot;, &quot;num_window&quot;, &quot;new_window&quot;)
         training_knn &lt;- training_knn[, !names(training_knn) %in% excludecols]
-        testing_knn &lt;- testing_knn[, !names(testing_knn) %in% excludecols]
-        
-        # NORMALIZE DATA both training_knn and testing_knn
+        testing_knn &lt;- testing_knn[, !names(testing_knn) %in% excludecols]</code></pre>
+<p>We are gonna to normalize data here to make each column with a standard deviation equal 1.</p>
+<pre class="r"><code>        # NORMALIZE DATA both training_knn and testing_knn
         normalize &lt;- function(x) { return ((x - min(x)) / (max(x) - min(x)))}
         tem &lt;- rbind(training_knn[,-53], testing_knn[-53])
         t_n &lt;- as.data.frame(lapply(tem, normalize))
@@ -109,7 +109,7 @@ test_pml &lt;- read.csv(&quot;/Users/Richard/Desktop/Rcourse/data/practical_mach
         training_body &lt;- training_knn[intrain,][,-53]
         validation_body &lt;- training_knn[-intrain,][,-53]
         training_label &lt;- training_knn[intrain,][,53]
-        validation_label &lt;- training_knn[-intrain,][,53]</code></pre>
+        validation_label &lt;- training_knn[-intrain,][,53]  </code></pre>
 </div>
 <div id="validation-set-prediction-and-evaluation" class="section level1">
 <h1>VALIDATION SET PREDICTION and EVALUATION</h1>
@@ -151,6 +151,7 @@ print(confusionMatrix(pred_vlidation, validation_label))  </code></pre>
 </div>
 <div id="performace-increase" class="section level1">
 <h1>PERFORMACE INCREASE</h1>
+<p>First, we will try different k values.</p>
 <pre class="r"><code>    # try different K - k=20    
     pred_vlidation&lt;- knn(training_body,validation_body, training_label, k=20 )
     print(confusionMatrix(pred_vlidation , validation_label))</code></pre>
@@ -222,6 +223,7 @@ print(confusionMatrix(pred_vlidation, validation_label))  </code></pre>
 </div>
 <div id="performance-increase-2" class="section level1">
 <h1>PERFORMANCE INCREASE 2</h1>
+<p>Second,instead of normalizing data, we use Z-score to standardize our data set. THen try KNN model with different k values.</p>
 <pre class="r"><code>    # USE Z-SCORE SDANDARDIZE DATA
     t_z &lt;- as.data.frame(scale(training_knn[,-53]))
     training_knn_z&lt;- cbind(t_z, training_knn[53])
@@ -337,6 +339,13 @@ print(confusionMatrix(pred_vlidation, validation_label))  </code></pre>
 ## Detection Rate         0.2807   0.1848   0.1672   0.1586   0.1810
 ## Detection Prevalence   0.2847   0.1891   0.1774   0.1662   0.1825
 ## Balanced Accuracy      0.9904   0.9749   0.9734   0.9791   0.9914</code></pre>
+</div>
+<div id="conclusion" class="section level1">
+<h1>CONCLUSION</h1>
+<ol style="list-style-type: decimal">
+<li>With the same K value, z-score standardizing data has better better prediction than normalizating the data.</li>
+<li>As K value decreases, prediction accuracy increases.</li>
+</ol>
 </div>
 
 
