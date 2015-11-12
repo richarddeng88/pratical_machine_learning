@@ -1,0 +1,102 @@
+---
+title: "Prediction of Human Activity Recognition (KNN)"
+author: "Qing (Richard) Deng"
+date: "November 12, 2015"
+output: html_document
+---
+
+Practical Machine Learning Project
+
+## Data source and downloading
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+```{r}
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+#download.file(url,"/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-training.csv")
+train_pml <- read.csv("/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-training.csv")
+
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(url,"/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-testing.csv")
+test_pml <- read.csv("/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-testing.csv")
+```
+
+
+## FEATURE SELECTION
+First, we clean up missing values, remove zero covariate and descriptive features. 
+```{r}
+        # DEAL COMLUMNS WITH NAs
+        na <- sapply(test_pml, function(x){sum(is.na(x))})
+        training_knn <- subset(train_pml, select = !(names(train_pml) %in% names(na[na==20])))
+        testing_knn <- subset(test_pml, select = !(names(test_pml) %in% names(na[na==20])))
+        
+        # REMOVE DESCREIPTIVE FEATURES. 
+        excludecols <- c("X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", 
+                         "cvtd_timestamp", "num_window", "new_window")
+        training_knn <- training_knn[, !names(training_knn) %in% excludecols]
+        testing_knn <- testing_knn[, !names(testing_knn) %in% excludecols]
+        
+        # NORMALIZE DATA both training_knn and testing_knn
+        normalize <- function(x) { return ((x - min(x)) / (max(x) - min(x)))}
+        tem <- rbind(training_knn[,-53], testing_knn[-53])
+        t_n <- as.data.frame(lapply(tem, normalize))
+        training_knn<- cbind(t_n[-20:-1,], training_knn[53])
+        testing_knn <- t_n[19623:19642,]
+        
+        # DATA SPLITING
+        library(caret); set.seed(1001)
+        intrain <- createDataPartition(y=training_knn$classe, p=0.8, list = F)
+        training_body <- training_knn[intrain,][,-53]
+        validation_body <- training_knn[-intrain,][,-53]
+        training_label <- training_knn[intrain,][,53]
+        validation_label <- training_knn[-intrain,][,53]
+```
+
+# VALIDATION SET PREDICTION and EVALUATION
+We will us KNN as our model IMPLEMENTED IN THE class PACKAGE
+```{r}
+library(class)
+pred_vlidation<- knn(training_body,validation_body, training_label, k=80 )
+print(confusionMatrix(pred_vlidation, validation_label))  
+```
+
+# PERFORMACE INCREASE
+
+```{r}
+    # try different K - k=20    
+    pred_vlidation<- knn(training_body,validation_body, training_label, k=20 )
+    print(confusionMatrix(pred_vlidation , validation_label))
+```
+
+```{r}
+    # try different K - k=2 
+    pred_vlidation<- knn(training_body,validation_body, training_label, k=5 )
+    print(confusionMatrix(pred_vlidation , validation_label))  
+```
+
+# PERFORMANCE INCREASE 2
+```{r}
+    # USE Z-SCORE SDANDARDIZE DATA
+    t_z <- as.data.frame(scale(training_knn[,-53]))
+    training_knn_z<- cbind(t_z, training_knn[53])
+    
+    # DATA SPLITING
+    library(caret); set.seed(1001)
+    intrain <- createDataPartition(y=training_knn_z$classe, p=0.8, list = F)
+    training_body <- training_knn_z[intrain,][,-53]
+    validation_body <- training_knn_z[-intrain,][,-53]
+    training_label <- training_knn_z[intrain,][,53]
+    validation_label <- training_knn_z[-intrain,][,53]  
+    
+    # PREDICTING
+    # when k=50
+    pred_vlidation<- knn(training_body,validation_body, training_label, k=80 )
+    print(confusionMatrix(pred_vlidation , validation_label))  
+    
+    # when k=20
+    pred_vlidation<- knn(training_body,validation_body, training_label, k=20 )
+    print(confusionMatrix(pred_vlidation , validation_label))  
+    
+    # when k=5
+    pred_vlidation<- knn(training_body,validation_body, training_label, k=5 )
+    print(confusionMatrix(pred_vlidation , validation_label))
+```

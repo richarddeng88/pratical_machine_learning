@@ -1,0 +1,125 @@
+---
+title: "Prediction of Human Activity Recognition (Random Forest)"
+author: "Qing (Richard) Deng"
+date: "November 12, 2015"
+output: html_document
+---
+Practical Machine Learning Project
+
+# INTRODUCTION
+
+Using fitness wearable devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively. These type of can help people to find patterns in their behavior, quantifying how much of a particular activity they do. But they rarely quantify how well they do it. 
+
+In a research, six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different ways as follows:: 
+
+Class A: exactly according to the specification.
+
+Class B: throwing the elbows to the front.
+
+Class C: lifting the dumbbell only halfway.
+
+Class D: lowering the dumbbell only halfway.
+
+Class E: throwing the hips to the front.
+
+In this project, our goal is to to predict how well an activity was performed by the wearer. 
+
+## Data source and downloading
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+```{r}
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+#download.file(url,"/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-training.csv")
+train_pml <- read.csv("/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-training.csv")
+
+url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+download.file(url,"/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-testing.csv")
+test_pml <- read.csv("/Users/Richard/Desktop/Rcourse/data/practical_machine_l/pml-testing.csv")
+```
+
+The training data has 19622 observations and 160 features, and the distribution of the five measured stances A,B,C,D,E is:
+```{r}
+dim(train_pml)
+table(train_pml$classe)
+```
+
+# PREPROCESSING
+## DATA SPLITING
+We separate our training data into a training set and a validation set so that we can validate our model.
+```{r}
+    library(caret); set.seed(1001)
+    intrain <- createDataPartition(y=train_pml$classe, p=0.8, list = F)
+    training <- train_pml[intrain,]
+    validation <- train_pml[-intrain,]
+```
+
+## FEATURE SELECTION
+First, we clean up missing values, remove zero covariate and descriptive features. 
+```{r}
+# DEAL COMLUMNS WITH NAs
+na <- sapply(test_pml, function(x){sum(is.na(x))})
+training <- subset(training, select = !(names(training) %in% names(na[na==20])))
+# REMOVE ZERO COVARIATE
+nsv <- nearZeroVar(training)
+training <- training[,-nsv]
+# REMOVE DESCREIPTIVE FEATURES. 
+excludecols <- c("X", "user_name", "raw_timestamp_part_1", "raw_timestamp_part_2", 
+                  "cvtd_timestamp", "num_window")
+training <- training[, !names(training) %in% excludecols]
+```
+
+Data structure looks like this:
+```{r}
+str(training)
+```
+
+# MODEL TRAIN(RANDOM FOREST) 
+We will use random forest as our model implemented in the randomForest package
+```{r}
+library(randomForest)
+rfModel <- randomForest(classe~., data=training, importance= T, ntrees=10)
+```
+
+# MODEL VALIDATION - VALIDATION SET ACCURACY
+Let us now test our model performance on the validation set.
+```{r}
+pre_validation <- predict(rfModel,validation)
+print(confusionMatrix(pre_validation, validation$classe)) ## acuurancy = 0.9967
+```
+
+# TEST SET PREDICTION
+The prediction of our algorithm for the test set is:
+```{r}
+pre_test <- predict(rfModel,test_pml)
+pre_test
+```
+
+# OUTPUT THE RESULT ACCORDING TO THE INSTRUCTURE. 
+We then save the output to files according to instructions and post it to the submission page.
+```{r}
+answers <- as.vector(pre_test)
+
+pml_write_files = function(x) {
+    n = length(x)
+    for (i in 1:n) {
+        filename = paste0("problem_id_", i, ".txt")
+        write.table(x[i], file = filename, quote = FALSE, row.names = FALSE, 
+                    col.names = FALSE)
+    }
+}
+
+pml_write_files(answers)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
