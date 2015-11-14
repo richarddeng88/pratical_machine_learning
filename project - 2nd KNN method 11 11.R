@@ -42,6 +42,19 @@ M <- abs(cor(training[,c(-3,-4,-58)])) # leave out the charater type
 diag(M) <- 0 # every variable has correlation 1 with itself. So i don't need to care the diag(M)
 which(M>0.8, arr.ind = T)
 
+##======================================================================================
+knn_values=c(1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,110,120,140,180,200)
+Knn=length(knn_values)
+i=0
+knn.accuracy=matrix(0,Knn)
+for (j in 1:knn_values){
+    i=i+1
+    pred_vlidation=knn(training_body,validation_body, training_label, k=j)
+    knn.accuracy[i]= mean(pred_vlidation == validation_label)
+}
+
+##======================================================================================
+
 ## VALIDATION PREDICTION and EVALUATION- WE WILL USE KNN as our model IMPLEMENTED IN THE class PACKAGE
 library(class)
 pred_vlidation<- knn(training_body,validation_body, training_label, k=100 )
