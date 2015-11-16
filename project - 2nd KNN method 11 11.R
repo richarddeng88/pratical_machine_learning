@@ -43,16 +43,22 @@ diag(M) <- 0 # every variable has correlation 1 with itself. So i don't need to 
 which(M>0.8, arr.ind = T)
 
 ##======================================================================================
+library(class)
 knn_values=c(1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,110,120,140,180,200)
-Knn=length(knn_values)
-i=0
-knn.accuracy=matrix(0,Knn)
-for (j in 1:knn_values){
-    i=i+1
-    pred_vlidation=knn(training_body,validation_body, training_label, k=j)
-    knn.accuracy[i]= mean(pred_vlidation == validation_label)
+t=0
+knn.accuracy= rep(0,length(knn_values))
+for (i in knn_values){
+    t=t+1
+    pred_vlidation=knn(training_body,validation_body, training_label, k=i)
+    knn.accuracy[t]= mean(pred_vlidation == validation_label)
 }
+knn.accuracy
 
+# [1] 0.9869997 0.9780780 0.9737446 0.9676268 0.9658425 0.9518226 0.9528422 0.9457048 0.9403518 0.9357634
+#[11] 0.8852919 0.8557227 0.8281927 0.8083100 0.7856232 0.7675249 0.7540148 0.7420342 0.7313281 0.7239358
+#[21] 0.7142493 0.7015040 0.6719347 0.6609737
+
+plot(knn_values, knn.accuracy, type = "l")
 ##======================================================================================
 
 ## VALIDATION PREDICTION and EVALUATION- WE WILL USE KNN as our model IMPLEMENTED IN THE class PACKAGE
