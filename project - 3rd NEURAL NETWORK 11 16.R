@@ -44,19 +44,18 @@ f <- as.formula(paste('classe ~', paste(n[!n %in% 'classe'], collapse = ' + ')))
 library(nnet)
 a = nnet(classe~., data=training,size=5,maxit=10000)
 
-
 ## EVALUATING MODEL PERFORMANCE
-model_result <- compute(concrete_model, testing[,1:8])
-pred <- model_result$net.result
-# because it's not classification problem, we use correlation instead of confusion matrix. 
-cor(pred, testing$strength)
+pred <- predict(a,newdata=validation,type="class")
+print(confusionMatrix(pred, validation[,53]))  #0.85
 
 ## IMPROVING PERFORMANCE
-concrete_model <- neuralnet(strength~cement + slag + ash + water+ superplastic + 
-                                coarseagg + fineagg + age, data=training, hidden = 5)
-plot(concrete_model)
+    # we trying differnet hidden node size =10
+    a = nnet(classe~., data=training,size=10,maxit=10000)
+    pred <- predict(a,newdata=validation,type="class")
+    print(confusionMatrix(pred, validation[,53])) # 0/9324497
 
-model_result <- compute(concrete_model, testing[,1:8])
-pred <- model_result$net.result
-cor(pred, testing$strength)
+    # we trying differnet hidden node size=15 
+    a = nnet(classe~., data=training,size=15,maxit=10000)
+    pred <- predict(a,newdata=validation,type="class")
+    print(confusionMatrix(pred, validation[,53])) # 0.9454499
     
