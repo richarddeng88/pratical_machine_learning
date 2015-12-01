@@ -11,14 +11,14 @@ test_pml <- read.csv("data/practical_machine_l/pml-testing.csv",stringsAsFactors
     training <- train_pml[intrain,]
     validation <- train_pml[-intrain,]
 
-    # FEATURE SELECTION
+    # FEATURE SELECTION (PREPROCESSING)
         # DEAL COMLUMNS WITH NAs
         na <- sapply(test_pml, function(x){sum(is.na(x))})
         training <- subset(training, select = !(names(training) %in% names(na[na==20])))
         #test_na <- subset(test_pml, select = !(names(test_pml) %in% names(na[na==20])))
     
         # REMOVE ZERO COVARIATE
-        nsv <- nearZeroVar(training) # optiong: , saveMetrics = T.
+        nsv <- nearZeroVar(training) # optiong:  nearZeroVar(training,saveMetrics = T)
                                     # nearZeroVar diagnoses predictors that has one unique value
                                     # or that have very few unique values. 
         training <- training[,-nsv]
