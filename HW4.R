@@ -72,11 +72,22 @@ training = dat[year(dat$date) < 2012,]
 testing = dat[(year(dat$date)) > 2011,]
 tstrain = ts(training$visitsTumblr)
 
+library(forecast)
+mod_ts <- bats(tstrain)
+fcast <- forecast(mod_ts, level = 95, h = dim(testing)[1])
+sum(fcast$lower < testing$visitsTumblr & testing$visitsTumblr < fcast$upper) / 
+    dim(testing)[1]
 
+#Q5
+set.seed(3523); library(caret)
+library(AppliedPredictiveModeling)
+data(concrete)
+inTrain = createDataPartition(concrete$CompressiveStrength, p = 3/4)[[1]]
+training = concrete[ inTrain,]
+testing = concrete[-inTrain,]
 
-
-
-
-
-
+set.seed(325); library(e1071); library(forecast)
+svm_model <- svm(CompressiveStrength~., data = training)
+svm_pred <- predict(svm_model, testing)
+accuracy(svm_pred, testing$CompressiveStrength)
 
