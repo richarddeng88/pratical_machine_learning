@@ -9,14 +9,19 @@ dim(training); dim(testing)
 kMeans1 <- kmeans(subset(training,select=-c(Species)),centers=3)
 training$clusters <- as.factor(kMeans1$cluster)
 qplot(Petal.Width,Petal.Length,colour=clusters,data=training)
+sum(kMeans1$withinss)
+    # with different k, we will have within cluster sum of squares, we get the best k by finding the least SSE
+
 
 # compare to real label 
 table(kMeans1$cluster,training$Species)
 
 # build predictor
-modFit <- train(clusters ~.,data=subset(training,select=-c(Species)),method="rpart")
+modFit <- train(clusters ~.,
+                data=subset(training,select=-c(Species)),
+                method="rpart")
 table(predict(modFit,training),training$Species)
 
 # apply on the test data
 testClusterPred <- predict(modFit,testing) 
-table(testClusterPred ,testing$Species)
+table(testClusterPred ,testing$Species) 
