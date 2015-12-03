@@ -11,9 +11,11 @@ training <- buildData[inTrain,]; testing <- buildData[-inTrain,]
 
 #build two different models
 mod1 <- train(wage ~.,method="glm",data=training)
-mod2 <- train(wage ~.,method="rf",
+mod2 <- train(wage ~.,
+              method="rf",
               data=training, 
-              trControl = trainControl(method="cv"),number=3)
+              trControl = trainControl(method="cv"),
+              number=3)
 
 
 # predicting the test set
@@ -21,11 +23,11 @@ pred1 <- predict(mod1,testing); pred2 <- predict(mod2,testing)
 qplot(pred1,pred2,colour=wage,data=testing)
 
 # Fit a model that combines predictors
-predDF <- data.frame(pred1,pred2,wage=testing$wage)
+predDF <- data.frame(pred1,pred2,wage=testing$wage) # build a data consisting prediction from mod1 and mod2
 combModFit <- train(wage ~.,method="gam",data=predDF)
 combPred <- predict(combModFit,predDF)
 
-# test the error
+# test the error : we the the conbined predictor has the smallest test error.
 sqrt(sum((pred1-testing$wage)^2))
 sqrt(sum((pred2-testing$wage)^2))
 sqrt(sum((combPred-testing$wage)^2))
@@ -35,7 +37,10 @@ pred1V <- predict(mod1,validation); pred2V <- predict(mod2,validation)
 predVDF <- data.frame(pred1=pred1V,pred2=pred2V)
 combPredV <- predict(combModFit,predVDF)
 
-
+#Evaluate on validation
+sqrt(sum((pred1V-validation$wage)^2))
+sqrt(sum((pred2V-validation$wage)^2))
+sqrt(sum((combPredV-validation$wage)^2))
 
 
 
